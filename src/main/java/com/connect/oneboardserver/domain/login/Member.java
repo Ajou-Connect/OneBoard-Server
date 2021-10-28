@@ -6,11 +6,11 @@ public class Member {
     private String name;
     private String email;
     private String password;
-    private Long user_type;
+    private int user_type;
     private String university;
     private String major;
     private String lecture_id;
-
+    private String student_num;
 
     public Long getId() {
         return id;
@@ -44,11 +44,11 @@ public class Member {
         this.password = password;
     }
 
-    public Long getUser_type() {
+    public int getUser_type() {
         return user_type;
     }
 
-    public void setUser_type(Long user_type) {
+    public void setUser_type(int user_type) {
         this.user_type = user_type;
     }
 
@@ -74,5 +74,13 @@ public class Member {
 
     public void setLecture_id(String lecture_id) {
         this.lecture_id = lecture_id;
+    }
+
+    public String getStudent_num() {
+        return student_num;
+    }
+
+    public void setStudent_num(String student_num) {
+        this.student_num = student_num;
     }
 }
