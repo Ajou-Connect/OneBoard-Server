@@ -3,16 +3,20 @@ package com.connect.oneboardserver.service.login;
 import com.connect.oneboardserver.domain.login.Member;
 import com.connect.oneboardserver.repository.login.MemberRepository;
 import com.connect.oneboardserver.repository.login.MemoryMemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class MemberService {
     private final MemberRepository memberRepository;
+
+    @Autowired
     public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
-
     /**
      * 회원가입
      */
