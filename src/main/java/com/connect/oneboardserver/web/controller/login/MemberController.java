@@ -1,16 +1,37 @@
 package com.connect.oneboardserver.web.controller.login;
 
-import com.connect.oneboardserver.service.login.MemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.connect.oneboardserver.domain.login.Member;
+import com.connect.oneboardserver.repository.login.MemberRepository;
+import com.connect.oneboardserver.repository.login.MemoryMemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.validation.Valid;
 
 @Controller
+@RequiredArgsConstructor
+@RequestMapping("/members")
 public class MemberController {
 
-    private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    public MemberController(MemberService memberService){
-        this.memberService = memberService;
+    @GetMapping("/add")
+    public String addForm(@ModelAttribute("member") Member member) {
+        return "members/addMemberForm";
+    }
+
+    @PostMapping("/add")
+    public String save(@Valid @ModelAttribute Member member, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "members/addMemberForm";
+        }
+
+        memberRepository.save(member);
+        return "redirect:/";
     }
 }
