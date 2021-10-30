@@ -2,7 +2,9 @@ package com.connect.oneboardserver.domain.login;
 
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 @Data
@@ -13,10 +15,11 @@ public class Member {
     @NotEmpty
     private String name;
     @NotEmpty
+    @Email
     private String email;
     @NotEmpty
     private String password;
-    @NotEmpty
+    @NotNull
     private int user_type;
     @NotEmpty
     private String university;
