@@ -1,4 +1,4 @@
-package com.connect.oneboardserver.controller.login;
+package com.connect.oneboardserver.web.controller.login;
 
 import com.connect.oneboardserver.service.login.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
