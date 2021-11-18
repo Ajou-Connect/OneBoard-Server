@@ -25,7 +25,7 @@ public class Lesson {
     @Column(nullable = false)
     private String date;
 
-    @Column(length = 128, nullable = false)
+    @Column(length = 128)
     private String note;
 
     @Column(nullable = false)
