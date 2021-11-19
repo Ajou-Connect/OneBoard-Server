@@ -36,7 +36,7 @@ public class NoteService {
                 return new ResponseDto("FAIL");
             }
             // 강의노트 파일이 있으면 파일 삭제
-            else if(lesson.getNote() != null) {
+            if(lesson.getNote() != null) {
                 if(storageService.delete(lesson.getNote())) {
                     lesson.updateNote(null);
                 }
@@ -73,7 +73,7 @@ public class NoteService {
                     lesson.updateNote(null);
                     return new ResponseDto("SUCCESS");
                 } else {
-                    throw new Exception("No file to delete");
+                    throw new Exception("fail");
                 }
             } else {
                 throw new Exception("No note");
@@ -89,16 +89,20 @@ public class NoteService {
         Resource resource = null;
         try {
             lesson = lessonRepository.findById(lessonId).orElseThrow(Exception::new);
-            String filePath = lesson.getNote();
-            resource = storageService.load(filePath);
-            if (!lesson.getLecture().getId().equals(lectureId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resource);
+            if(lesson.getNote() != null) {
+                String filePath = lesson.getNote();
+                resource = storageService.load(filePath);
+                if (!lesson.getLecture().getId().equals(lectureId)) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resource);
+                }
+                String contentDisposition = "attachment; filename=\"" +
+                        lesson.getTitle() + "_note\"";
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                        .body(resource);
+            }else {
+                throw new Exception("No file to load");
             }
-            String contentDisposition = "attachment; filename=\"" +
-                    lesson.getTitle() + "_note\"";
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .body(resource);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resource);
