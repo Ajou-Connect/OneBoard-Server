@@ -38,12 +38,20 @@ public class AssignmentRepositoryTest {
     public void createAssignment() {
         //given
         String lectureTitle = "test lecture";
+<<<<<<< HEAD
         String lecturePlan = "test url";
+=======
+        String lecturePlanUrl = "test url";
+>>>>>>> 5971c9a47de4c33af7e338fead5026229ae9caa8
         String semester = "2021-2";
 
         Lecture lecture = lectureRepository.save(Lecture.builder()
                 .title(lectureTitle)
+<<<<<<< HEAD
                 .lecturePlan(lecturePlan)
+=======
+                .lecturePlanUrl(lecturePlanUrl)
+>>>>>>> 5971c9a47de4c33af7e338fead5026229ae9caa8
                 .semester(semester)
                 .build());
 
