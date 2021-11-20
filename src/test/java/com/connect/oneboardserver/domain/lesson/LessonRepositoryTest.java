@@ -2,10 +2,7 @@ package com.connect.oneboardserver.domain.lesson;
 
 import com.connect.oneboardserver.domain.lecture.lesson.Lesson;
 import com.connect.oneboardserver.domain.lecture.lesson.LessonRepository;
-<<<<<<< HEAD
-import lombok.ToString;
-=======
->>>>>>> 5971c9a47de4c33af7e338fead5026229ae9caa8
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

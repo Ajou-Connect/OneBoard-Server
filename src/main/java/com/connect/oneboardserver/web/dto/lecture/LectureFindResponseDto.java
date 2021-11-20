@@ -12,17 +12,6 @@ public class LectureFindResponseDto {
     private Long id;
     private String title;
     private String semester;
-<<<<<<< HEAD
-    private String lecturePlan;
-    private String professor;
-
-    @Builder
-    public LectureFindResponseDto(Long id, String title, String semester, String lecturePlan, String professor) {
-        this.id = id;
-        this.title = title;
-        this.semester = semester;
-        this.lecturePlan = lecturePlan;
-=======
     private String professor;
 
     @Builder
@@ -30,7 +19,6 @@ public class LectureFindResponseDto {
         this.id = id;
         this.title = title;
         this.semester = semester;
->>>>>>> 5971c9a47de4c33af7e338fead5026229ae9caa8
         this.professor = professor;
     }
 
@@ -39,10 +27,6 @@ public class LectureFindResponseDto {
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .semester(entity.getSemester())
-<<<<<<< HEAD
-                .lecturePlan(entity.getLecturePlan())
-=======
->>>>>>> 5971c9a47de4c33af7e338fead5026229ae9caa8
                 .build();
     }
 
