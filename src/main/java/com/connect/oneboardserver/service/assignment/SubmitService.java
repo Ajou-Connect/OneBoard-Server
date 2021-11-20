@@ -7,7 +7,10 @@ import com.connect.oneboardserver.domain.assignment.Submit;
 import com.connect.oneboardserver.domain.assignment.SubmitRepository;
 import com.connect.oneboardserver.domain.login.Member;
 import com.connect.oneboardserver.web.dto.ResponseDto;
-import com.connect.oneboardserver.web.dto.assignment.*;
+import com.connect.oneboardserver.web.dto.assignment.SubmitCheckRequestDto;
+import com.connect.oneboardserver.web.dto.assignment.SubmitCreateRequestDto;
+import com.connect.oneboardserver.web.dto.assignment.SubmitFindResponseDto;
+import com.connect.oneboardserver.web.dto.assignment.SubmitResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -31,7 +34,7 @@ public class SubmitService {
     public ResponseDto createSubmit(Long lectureId, Long assignmentId, ServletRequest request, SubmitCreateRequestDto requestDto) {
 
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
-        Member student = (Member) userDetailsService.loadUserByUsername(jwtTokenProvider.getUserPk(token));
+        Member member = (Member) userDetailsService.loadUserByUsername(jwtTokenProvider.getUserPk(token));
 
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
@@ -41,7 +44,7 @@ public class SubmitService {
             return new ResponseDto("FAIL");
         } else {
             Submit submit = requestDto.toEntity();
-            submit.setStudent(student);
+            submit.setMember(member);
             submit.setAssignment(assignment);
 
             submitRepository.save(submit);
@@ -102,36 +105,4 @@ public class SubmitService {
     }
 
 
-    public ResponseDto findSubmitStu(Long lectureId, Long assignmentId, ServletRequest request) {
-        String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
-        Member student = (Member) userDetailsService.loadUserByUsername(jwtTokenProvider.getUserPk(token));
-
-        Assignment assignment = assignmentRepository.findById(assignmentId)
-                .orElseThrow(()->new IllegalArgumentException("해당 과제가 없습니다. id="+assignmentId));
-
-        if (!assignment.getLecture().getId().equals(lectureId)) {
-            return new ResponseDto("FAIL");
-        } else {
-            Submit submit = submitRepository.findByStudentIdAndAssignmentId(student.getId(), assignmentId);
-            SubmitFindResponseDto responseDto = new SubmitFindResponseDto(submit);
-            return new ResponseDto("SUCCESS", responseDto);
-        }
-    }
-
-    public ResponseDto updateSubmit(Long lectureId, Long assignmentId, ServletRequest request, SubmitUpdateRequestDto requestDto) {
-        String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
-        Member student = (Member) userDetailsService.loadUserByUsername(jwtTokenProvider.getUserPk(token));
-
-        Assignment assignment = assignmentRepository.findById(assignmentId)
-                .orElseThrow(()->new IllegalArgumentException("해당 과제가 없습니다. id="+assignmentId));
-
-        if (!assignment.getLecture().getId().equals(lectureId)) {
-            return new ResponseDto("FAIL");
-        } else {
-            Submit submit = submitRepository.findByStudentIdAndAssignmentId(student.getId(), assignmentId);
-            submit.update(requestDto.getContent(), requestDto.getFileUrl());
-            SubmitResponseDto responseDto = new SubmitResponseDto(submit);
-            return new ResponseDto("SUCCESS", responseDto);
-        }
-    }
 }

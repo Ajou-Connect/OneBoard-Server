@@ -65,4 +65,8 @@ public class Lesson {
         this.meetingId = meetingId;
         this.videoUrl = videoUrl;
     }
+
+    public void updateNote(String note) {
+        this.note = note;
+    }
 }

@@ -8,6 +8,4 @@ public interface MemberLectureRepository extends JpaRepository<MemberLecture, Lo
     List<MemberLecture> findAllByMemberId(Long memberId);
 
     List<MemberLecture> findAllByLectureId(Long lectureId);
-
-    List<MemberLecture> findAllByLectureIdAndMemberUserType(Long lectureId, String userType);
 }
