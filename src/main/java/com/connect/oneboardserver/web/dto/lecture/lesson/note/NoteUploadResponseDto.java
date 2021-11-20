@@ -1,4 +1,4 @@
-package com.connect.oneboardserver.web.dto.lecture.lesson;
+package com.connect.oneboardserver.web.dto.lecture.lesson.note;
 
 import lombok.Builder;
 import lombok.Getter;

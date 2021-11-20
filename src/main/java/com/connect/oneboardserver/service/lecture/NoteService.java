@@ -4,7 +4,7 @@ import com.connect.oneboardserver.domain.lecture.lesson.Lesson;
 import com.connect.oneboardserver.domain.lecture.lesson.LessonRepository;
 import com.connect.oneboardserver.service.storage.StorageService;
 import com.connect.oneboardserver.web.dto.ResponseDto;
-import com.connect.oneboardserver.web.dto.lecture.lesson.NoteUploadResponseDto;
+import com.connect.oneboardserver.web.dto.lecture.lesson.note.NoteUploadResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
