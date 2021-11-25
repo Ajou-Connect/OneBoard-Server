@@ -15,7 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -37,7 +41,7 @@ public class LessonService {
             e.printStackTrace();
             return new ResponseDto("FAIL");
         }
-        List<Lesson> lessonList = lessonRepository.findAllByLectureId(lecture.getId());
+        List<Lesson> lessonList = lessonRepository.findAllByLectureIdOrderByDateDesc(lecture.getId());
         List<LessonListFindResponseDto> lessonListFindResponseDtoList = new ArrayList<>();
         for (int i = 0; i < lessonList.size(); i++) {
             lessonListFindResponseDtoList.add(LessonListFindResponseDto.toResponseDto(lessonList.get(i)));
@@ -219,56 +223,73 @@ public class LessonService {
             return new ResponseDto("SUCCESS", responseDto);
         }
     }
+    public ResponseDto findLessonDefaultInfo(Long lectureId) {
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(()-> new IllegalArgumentException("해당 과목이 없습니다 : id = " + lectureId));
 
-    @Transactional
-    public ResponseDto updateLessonFile(Long lectureId, Long lessonId, LessonUpdateRequestDto requestDto, MultipartFile file) throws Exception {
-        Lesson lesson = null;
-        String uploadedFile = null;
+        List<Lesson> lessonList = lessonRepository.findAllByLectureId(lectureId);
+        String lessonDefaultTitle = lecture.getTitle() + " 수업 " + (lessonList.size() + 1);
 
-        try {
-            lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(Exception::new);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseDto("FAIL");
-        }
-        if (!lesson.getLecture().getId().equals(lectureId)) {
-            return new ResponseDto("FAIL");
-        } else {
-            if (lesson.getNoteUrl() != null) {storageService.delete(lesson.getNoteUrl());}
+        List<String[]> defaultDateTimeList = parseDefaultDateTime(lecture.getDefaultDateTime());
+        String nextLessonDateTime = getNextLessonDateTime(defaultDateTimeList);
 
-            Integer Type = requestDto.getType();
-            if (Type == 0) {
-                requestDto.setRoom(null);
-                requestDto.setMeetingId(null);
-                lessonUpdate(requestDto, lesson);
-            } else if (Type == 1) {
-                requestDto.setRoom(null);
-                requestDto.setVideoUrl(null);
-                lessonUpdate(requestDto, lesson);
-            } else if (Type == 2) {
-                requestDto.setVideoUrl(null);
-                requestDto.setMeetingId(null);
-                lessonUpdate(requestDto, lesson);
-            } else {
-                return new ResponseDto("FAIL");
-            }
-            LessonUpdateResponseDto responseDto = LessonUpdateResponseDto.builder()
-                    .lessonId(lesson.getId())
-                    .build();
+        LessonFindDefaultResponseDto responseDto = LessonFindDefaultResponseDto.builder()
+                .defaultTitle(lessonDefaultTitle)
+                .defaultDateTime(nextLessonDateTime)
+                .defaultRoom(lecture.getDefaultRoom())
+                .build();
 
-            if (file != null) {
-                String path = "/lecture_" + lectureId + "/lesson_" + lessonId + "/note";
-                uploadedFile = storageService.store(path, file);
-
-                lesson.updateNoteUrl(uploadedFile);
-            }
-            return new ResponseDto("SUCCESS", responseDto);
-        }
+        return new ResponseDto("SUCCESS", responseDto);
     }
 
-    private void lessonUpdate(LessonUpdateRequestDto requestDto, Lesson lesson) {
-        lesson.update(requestDto.getTitle(), requestDto.getDate(), requestDto.getNoteUrl(), requestDto.getType(),
-                requestDto.getRoom(), requestDto.getMeetingId(), requestDto.getVideoUrl());
+    private int getDayOfWeekValue(String day) {
+        String[] dayOfWeek = {"월", "화", "수", "목", "금", "토", "일"};
+        return Arrays.asList(dayOfWeek).indexOf(day) + 1;
+    }
+
+    private List<String[]> parseDefaultDateTime(String defaultDateTime) {
+        String[] defaultDateTimes = defaultDateTime.split(", ");
+
+        List<String[]> defaultDateTimeList = new ArrayList<>();
+        for(int i = 0; i < defaultDateTimes.length; i++) {
+            String[] splitStr = defaultDateTimes[i].split("[ :-]");     // 월 12:00-13:30
+            defaultDateTimeList.add(splitStr);
+        }
+        return defaultDateTimeList;
+    }
+
+    private String getNextLessonDateTime(List<String[]> defaultDateTimeList) {
+        LocalDateTime nextLessonDateTime = null;
+
+        LocalDateTime now = LocalDateTime.now();
+        int todayOfWeek = now.getDayOfWeek().getValue();
+
+        for(int i = 0; i < defaultDateTimeList.size(); i++) {
+            String[] defaultDateTime = defaultDateTimeList.get(i);
+
+            int dateGap = getDayOfWeekValue(defaultDateTime[0]) - todayOfWeek;
+            boolean isNowBefore = LocalTime.of(now.getHour(), now.getMinute(), now.getSecond())
+                    .isBefore(LocalTime.of(Integer.valueOf(defaultDateTime[1]), Integer.valueOf(defaultDateTime[2])));
+            if((dateGap > 0) || (dateGap == 0 && isNowBefore)) {
+                nextLessonDateTime = now.plusDays(dateGap);
+                nextLessonDateTime = nextLessonDateTime
+                        .withHour(Integer.valueOf(defaultDateTime[1]))
+                        .withMinute(Integer.valueOf(defaultDateTime[2]))
+                        .withSecond(0);
+                break;
+            }
+        }
+        if(nextLessonDateTime == null) {
+            String[] defaultDateTime = defaultDateTimeList.get(0);
+            int dateGap = getDayOfWeekValue(defaultDateTime[0]) - todayOfWeek;
+
+            nextLessonDateTime = now.plusDays(7 - Math.abs(dateGap));
+            nextLessonDateTime = nextLessonDateTime
+                    .withHour(Integer.valueOf(defaultDateTime[1]))
+                    .withMinute(Integer.valueOf(defaultDateTime[2]))
+                    .withSecond(0);
+        }
+
+        return nextLessonDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }
