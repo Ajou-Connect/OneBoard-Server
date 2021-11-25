@@ -93,7 +93,7 @@ public class LessonService {
                 .lessonId(savedLesson.getId())
                 .build();
 
-        return new ResponseDto("SUCCESS" ,responseDto);
+        return new ResponseDto("SUCCESS", responseDto);
     }
 
     @Transactional
@@ -136,7 +136,7 @@ public class LessonService {
                     .type(requestDto.getType())
                     .room(requestDto.getRoom())
                     .build());
-            } else {
+        } else {
             return new ResponseDto("FAIL");
         }
         if (!savedLesson.getLecture().getId().equals(lectureId)) {
@@ -148,6 +148,7 @@ public class LessonService {
                 .build();
 
         if (file != null) {
+
             String path = "/lecture_" + lectureId + "/lesson_" + savedLesson.getId() + "/note";
             uploadedFile = storageService.store(path, file);
 
@@ -183,7 +184,7 @@ public class LessonService {
             return new ResponseDto("FAIL");
         }
 
-        if(!lesson.getLecture().getId().equals(lectureId)) {
+        if (!lesson.getLecture().getId().equals(lectureId)) {
             return new ResponseDto("FAIL");
         } else {
             if (lesson.getNoteUrl() != null) {
@@ -208,15 +209,66 @@ public class LessonService {
             return new ResponseDto("FAIL");
         }
 
-        if(!lesson.getLecture().getId().equals(lectureId)) {
+        if (!lesson.getLecture().getId().equals(lectureId)) {
             return new ResponseDto("FAIL");
         } else {
-            lesson.update(requestDto.getTitle(), requestDto.getDate(), requestDto.getNoteUrl(), requestDto.getType(),
-                    requestDto.getRoom(), requestDto.getMeetingId(), requestDto.getVideoUrl());
+            lessonUpdate(requestDto, lesson);
             LessonUpdateResponseDto responseDto = LessonUpdateResponseDto.builder()
                     .lessonId(lesson.getId())
                     .build();
             return new ResponseDto("SUCCESS", responseDto);
         }
+    }
+
+    @Transactional
+    public ResponseDto updateLessonFile(Long lectureId, Long lessonId, LessonUpdateRequestDto requestDto, MultipartFile file) throws Exception {
+        Lesson lesson = null;
+        String uploadedFile = null;
+
+        try {
+            lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(Exception::new);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseDto("FAIL");
+        }
+        if (!lesson.getLecture().getId().equals(lectureId)) {
+            return new ResponseDto("FAIL");
+        } else {
+            if (lesson.getNoteUrl() != null) {storageService.delete(lesson.getNoteUrl());}
+
+            Integer Type = requestDto.getType();
+            if (Type == 0) {
+                requestDto.setRoom(null);
+                requestDto.setMeetingId(null);
+                lessonUpdate(requestDto, lesson);
+            } else if (Type == 1) {
+                requestDto.setRoom(null);
+                requestDto.setVideoUrl(null);
+                lessonUpdate(requestDto, lesson);
+            } else if (Type == 2) {
+                requestDto.setVideoUrl(null);
+                requestDto.setMeetingId(null);
+                lessonUpdate(requestDto, lesson);
+            } else {
+                return new ResponseDto("FAIL");
+            }
+            LessonUpdateResponseDto responseDto = LessonUpdateResponseDto.builder()
+                    .lessonId(lesson.getId())
+                    .build();
+
+            if (file != null) {
+                String path = "/lecture_" + lectureId + "/lesson_" + lessonId + "/note";
+                uploadedFile = storageService.store(path, file);
+
+                lesson.updateNoteUrl(uploadedFile);
+            }
+            return new ResponseDto("SUCCESS", responseDto);
+        }
+    }
+
+    private void lessonUpdate(LessonUpdateRequestDto requestDto, Lesson lesson) {
+        lesson.update(requestDto.getTitle(), requestDto.getDate(), requestDto.getNoteUrl(), requestDto.getType(),
+                requestDto.getRoom(), requestDto.getMeetingId(), requestDto.getVideoUrl());
     }
 }
